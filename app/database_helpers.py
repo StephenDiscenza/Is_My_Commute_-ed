@@ -2,6 +2,7 @@ import requests
 import csv
 import sqlite3
 from sqlite3 import Error
+from werkzeug.security import generate_password_hash
 
 
 def create_cxn_on_db(db_name):
@@ -88,10 +89,16 @@ def update_station_ids(cxn):
 def get_user_info(username):
     cxn = create_cxn_on_db('static_data.db')
     cursor = cxn.cursor()
-    rows = cursor.execute("SELECT * FROM users WHERE username = ?", username)
+    rows = cursor.execute("SELECT * FROM users WHERE username = ?", [username]).fetchall()
     cxn.close()
     return rows
 
 
-if __name__ == '__main__':
-    setup_db()
+def add_user(request):
+    '''Insert new user into the db with a hashed password'''
+    cxn = create_cxn_on_db('static_data.db')
+    cursor = cxn.cursor()
+    cursor.execute("INSERT INTO users (username, hash) values(?, ?)", [request.form.get(
+        "username"), generate_password_hash(request.form.get("password"))])
+    cxn.commit()
+    cxn.close()
