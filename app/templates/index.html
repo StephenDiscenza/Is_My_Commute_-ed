@@ -5,5 +5,51 @@
 {% endblock %}
 
 {% block main %}
-<h1>Hi!</h1>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <td>Name</td>
+                <td>Check</td>
+                <td>Is This Fucked?</td>
+                <td>Edit</td>
+                <td>Delete</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% if commutes %}
+                {% for commute in commutes %}
+                    <tr>
+                        <td>{{ commute.name }}</td>
+                        <td>
+                            <form action="/checkcommute" method="post" class="form">
+                                <div class="form_group">
+                                    <input type="hidden" name="commute_id" id="commute_id" value={{ commute.id }}>
+                                    <button class="btn btn-primary mb-2" type="submit">Check</button>
+                                </div>
+                            </form>
+                        </td>
+                        <td id={{ commute.id }}></td>
+                        <td>
+                            <form action="/updatecommute" method="post" class="form">
+                                <div class="form_group">
+                                    <input type="hidden" name="commute_id" id="commute_id" value={{ commute.id }}>
+                                    <button class="btn btn-primary mb-2" type="submit">Edit</button>
+                                </div>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/deletecommute" method="post" class="form">
+                                <div class="form_group">
+                                    <input type="hidden" name="commute_id" id="commute_id" value={{ commute.id }}>
+                                    <button class="btn btn-primary mb-2" type="submit">Delete</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

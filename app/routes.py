@@ -1,17 +1,19 @@
-from crypt import methods
 from flask import redirect, render_template, request, session
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 from flask_session import Session
 
 from app import app
 from app.route_helpers import login_required, apology, validate_user_data
-from app.database_helpers import get_user_info, add_user
+from app.database_helpers import get_user_info, add_user, get_commutes
 
 
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    # Get all the commutes this user currently has
+    commutes = get_commutes(session["user_id"])
+    return render_template('index.html', commutes=commutes)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

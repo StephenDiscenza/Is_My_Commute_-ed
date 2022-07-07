@@ -102,3 +102,13 @@ def add_user(request):
         "username"), generate_password_hash(request.form.get("password"))])
     cxn.commit()
     cxn.close()
+
+
+def get_commutes(user_id):
+    '''Retrieves all commutes belonging to the supplied user id'''
+    cxn = create_cxn_on_db('static_data.db')
+    cxn.row_factory = sqlite3.Row
+    cursor = cxn.cursor()
+    commutes = cursor.execute("SELECT * FROM commutes WHERE user_id = ?", [user_id]).fetchall()
+    cxn.close()
+    return commutes
