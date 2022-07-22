@@ -24,7 +24,6 @@ def after_request(response):
     return response
 
 
-
 # Set up the db
 setup_db()
 

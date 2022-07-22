@@ -1,4 +1,3 @@
-from xmlrpc.client import FastParser
 from flask import session, redirect, render_template
 from functools import wraps
 
@@ -57,7 +56,7 @@ def validate_user_data(type, request):
     result['passed'] = True
     return result
     
-    
+
 def apology(message, code=400):
     """Render message as an apology to user."""
     def escape(s):

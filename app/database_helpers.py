@@ -21,6 +21,7 @@ def setup_db():
                     CREATE TABLE IF NOT EXISTS stations 
                     (station_id int NOT NULL,
                     complex_id int NOT NULL,
+                    lines text NOT NULL,
                     gtfs_stop_id varchar(255) NOT NULL,
                     stop_name varchar(255) NOT NULL,
                     latitude real NOT NULL,
@@ -62,6 +63,7 @@ def setup_db():
                     origin_id varchar(255) NOT NULL,
                     termination_name TEXT NOT NULL,
                     termination_id varchar(255) NOT NULL,
+                    line varchar(255) NOT NULL,
                     FOREIGN KEY (commute_id) REFERENCES commutes (id))
                     ''')
     cursor.execute('''
@@ -75,23 +77,29 @@ def setup_db():
     return
 
 
+def generic_lookup(query:str, data:list):
+    cxn = create_cxn_on_db('static_data.db')
+    cxn.row_factory = sqlite3.Row
+    cursor = cxn.cursor()
+    result = cursor.execute(query, data).fetchall()
+    cxn.close()
+    return result
+
+
 def update_station_ids(cxn):
     response = requests.get('https://atisdata.s3.amazonaws.com/Station/Stations.csv')
     cursor = cxn.cursor()
     cursor.execute('DELETE FROM stations')
     reader = csv.DictReader(response.content.decode().split('\n'), delimiter=',')
     for row in reader:
-        cursor.execute('''INSERT INTO stations (station_id, complex_id, gtfs_stop_id, stop_name, latitude, longitude)
-                          VALUES (?, ?, ?, ?, ?, ?)''', [row['Station ID'], row['Complex ID'], row['GTFS Stop ID'], row['Stop Name'], row['GTFS Latitude'], row['GTFS Longitude']])
+        cursor.execute('''INSERT INTO stations (station_id, complex_id, lines, gtfs_stop_id, stop_name, latitude, longitude)
+                          VALUES (?, ?, ?, ?, ?, ?, ?)''', 
+                          [row['Station ID'], row['Complex ID'], row['Daytime Routes'], row['GTFS Stop ID'], row['Stop Name'], row['GTFS Latitude'], row['GTFS Longitude']])
     return cxn
 
 
 def get_user_info(username):
-    cxn = create_cxn_on_db('static_data.db')
-    cursor = cxn.cursor()
-    rows = cursor.execute("SELECT * FROM users WHERE username = ?", [username]).fetchall()
-    cxn.close()
-    return rows
+    return generic_lookup( "SELECT * FROM users WHERE username = ?", [username])
 
 
 def add_user(request):
@@ -106,9 +114,42 @@ def add_user(request):
 
 def get_commutes(user_id):
     '''Retrieves all commutes belonging to the supplied user id'''
+    return generic_lookup("SELECT * FROM commutes WHERE user_id = ?", [user_id])
+
+
+def get_leg_data(commute_id):
+    '''Get's origin and destination data for each leg of a commute'''
+    return generic_lookup("SELECT * FROM commute_legs WHERE commute_id = ?", [commute_id])
+
+
+def add_commute_to_db(commute_data):
+    '''Adds the data from the supplied payload to the db'''
     cxn = create_cxn_on_db('static_data.db')
-    cxn.row_factory = sqlite3.Row
     cursor = cxn.cursor()
-    commutes = cursor.execute("SELECT * FROM commutes WHERE user_id = ?", [user_id]).fetchall()
+    ''' 
+    Expecting to get a json body with the format:
+    {
+        "name": "commute name",
+        "user_id": "id",
+        "legs": [
+            {
+                "line": "N",
+                "originName": "Astoria, Ditmars Blvd.",
+                "originId": "A01",
+                "terminationName": "59th Street, Lexington Ave.",
+                "terminationId": "A10"
+            }
+        ]
+    }
+    '''
+    commute_id = cursor.execute("INSERT INTO commutes (name, user_id) values(?, ?) RETURNING id", [commute_data['name'], commute_data['user_id']]).fetchall()[0][0]
+    for leg in commute_data['legs']:
+        cursor.execute("INSERT INTO commute_legs (commute_id, origin_name, origin_id, termination_name, termination_id, line) values(?, ?, ?, ?, ?, ?)", [commute_id, leg['originName'], leg['originId'], leg['terminationName'], leg['terminationId'], leg['line']])
+
+    cxn.commit()
     cxn.close()
-    return commutes
+
+
+def get_stations_by_line(line:str):
+    '''Fetch data for all stations on the provided line'''
+    return generic_lookup("SELECT stop_name, gtfs_stop_id FROM stations WHERE lines LIKE ?", [f'%{line}%'])

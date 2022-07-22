@@ -1,9 +1,32 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<script src="/static/new_commute.js"></script>
+{% endblock %}
+
 {% block title %}
-    How's My Commute
+    Add a commute
 {% endblock %}
 
 {% block main %}
-<h1>Interface for adding a new commute</h1>
+<form action="/addcommute" method="POST" class="form">
+    <div class="form_group">
+        <input autocomplete="off" autofocus name="name" placeholder="Name" type="text">
+        <!-- need to be able to enter mutiple legs of a commute. start with just one leg to get it working -->
+        Line <select name="line1" id="line1" onChange="update_drop_downs(this.options[this.selectedIndex].value)">
+            <option value="" selected="selected">Select a subway line</option>
+            {% for line in lines %}
+                <option value={{ line }}>{{ line }}</option>
+            {% endfor %}
+        </select>
+        Origin <select name="origin_name1" id="origin_name1">
+            <option value="" selected="selected">Select the origin station</option>
+        </select>
+        Destination <select name="termination_name1" id="termination_name1">
+            <option value="" selected="selected">Select the destination station</option>
+        </select>
+        <!-- Eventual end tag for some kind of commute leg grouping -->
+        <input type="submit" value="Add">
+    </div>
+</form> 
 {% endblock %}
