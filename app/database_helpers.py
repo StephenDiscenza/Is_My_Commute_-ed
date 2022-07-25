@@ -150,6 +150,16 @@ def add_commute_to_db(commute_data):
     cxn.close()
 
 
+def delete_commute_from_db(commute_id):
+    '''Deletes a commute record and associated commute legs from the db'''
+    cxn = create_cxn_on_db('static_data.db')
+    cursor = cxn.cursor()
+    cursor.execute("DELETE FROM commute_legs WHERE commute_id = ?", [commute_id])
+    cursor.execute("DELETE FROM commutes WHERE id = ?", [commute_id])
+    cxn.commit()
+    cxn.close()
+
+
 def get_stations_by_line(line:str):
     '''Fetch data for all stations on the provided line'''
     return generic_lookup("SELECT stop_name, gtfs_stop_id FROM stations WHERE lines LIKE ?", [f'%{line}%'])

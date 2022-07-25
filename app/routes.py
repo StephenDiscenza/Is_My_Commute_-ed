@@ -1,3 +1,5 @@
+from crypt import methods
+from imp import reload
 from flask import redirect, render_template, request, session, Response
 from werkzeug.security import check_password_hash
 from flask_session import Session
@@ -5,7 +7,7 @@ import json
 
 from app import app
 from app.route_helpers import login_required, apology, validate_user_data
-from app.database_helpers import get_user_info, add_user, get_commutes, get_leg_data, get_stations_by_line, add_commute_to_db
+from app.database_helpers import get_user_info, add_user, get_commutes, get_leg_data, get_stations_by_line, add_commute_to_db, delete_commute_from_db
 
 
 @app.route('/')
@@ -121,6 +123,14 @@ def add_commute():
         response = json.dumps({'error': f'Adding commute record failed'})
         return Response(response, 400, mimetype='application/json')
     
+    return redirect('/')
+
+
+@app.route('/deletecommute', methods=['POST'])
+@login_required
+def delete_commute():
+    commute_id = request.form.get('commute_id')
+    delete_commute_from_db(commute_id)
     return redirect('/')
 
 

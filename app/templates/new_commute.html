@@ -10,11 +10,10 @@
 
 {% block main %}
 <form action="/addcommute" method="POST" class="form">
-    <div class="form_group">
+    <div class="form_group" id="leg_data">
         <input autocomplete="off" autofocus name="name" placeholder="Name" type="text">
-        <!-- need to be able to enter mutiple legs of a commute. start with just one leg to get it working -->
-        Line <select name="line1" id="line1" onChange="update_drop_downs(this.options[this.selectedIndex].value)">
-            <option value="" selected="selected">Select a subway line</option>
+        Line <select name="line1" id="line1" onChange="update_drop_downs(this.options[this.selectedIndex].value, 1)">
+            <option value="" disabled selected="selected">Select a subway line</option>
             {% for line in lines %}
                 <option value={{ line }}>{{ line }}</option>
             {% endfor %}
@@ -25,8 +24,9 @@
         Destination <select name="termination_name1" id="termination_name1">
             <option value="" selected="selected">Select the destination station</option>
         </select>
-        <!-- Eventual end tag for some kind of commute leg grouping -->
-        <input type="submit" value="Add">
+        <div></div>
     </div>
+    <button type="button" onclick="add_commute_leg()">Add a Commute Leg</button>
+    <input type="submit" value="Add Commute">
 </form> 
 {% endblock %}
