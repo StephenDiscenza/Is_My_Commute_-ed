@@ -1,5 +1,3 @@
-from crypt import methods
-from imp import reload
 from flask import redirect, render_template, request, session, Response
 from werkzeug.security import check_password_hash
 from flask_session import Session
@@ -8,6 +6,7 @@ import json
 from app import app
 from app.route_helpers import login_required, apology, validate_user_data
 from app.database_helpers import get_user_info, add_user, get_commutes, get_leg_data, get_stations_by_line, add_commute_to_db, delete_commute_from_db
+from app.mta_data_helpers import get_commute_alets, analyze_commute_alerts
 
 
 @app.route('/')
@@ -79,17 +78,26 @@ def check_commute():
     '''Checks live and historical data to determine a likely delay for the given commute'''
     try:
         request_json = request.get_json()
+        commute_id = request_json['commute_id']
         app.logger.info(f"Recieved request: {request_json}")
     except Exception as e:
         app.logger.error(e)
         response = json.dumps({'error': f'Failed to get the body of the request with error {e}'})
         return Response(response, 400, mimetype='application/json')
-    # Get origin and destination data for each leg of the commute from the db
-    commute_legs = get_leg_data(request['commute_id'])
-    for leg in commute_legs:
-        # Get live data for line this leg uses
-        # Add at least one commute to the db before trying this part
-        pass
+    # Get a list of the alert data for all lines included in the commute
+    commute_alerts_text = get_commute_alets(commute_id)
+    # Use the alert data to determine whether the commute is bad
+    commute_is_bad = analyze_commute_alerts(commute_alerts_text)
+    response = json.dumps({'result': commute_is_bad, 'alerts': commute_alerts_text})
+    return Response(response, 200, mimetype='application/json')
+
+    
+    # # Get origin and destination data for each leg of the commute from the db
+    # commute_legs = get_leg_data(request['commute_id'])
+    # for leg in commute_legs:
+    #     # Get live data for line this leg uses
+    #     # Add at least one commute to the db before trying this part
+    #     pass
 
 
 @app.route('/addcommute', methods=['GET', 'POST'])

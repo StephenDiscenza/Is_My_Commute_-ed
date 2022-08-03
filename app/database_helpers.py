@@ -14,7 +14,7 @@ def create_cxn_on_db(db_name):
 
 
 def setup_db():
-    cxn = create_cxn_on_db('static_data.db')
+    cxn = create_cxn_on_db('commute_check.db')
     cursor = cxn.cursor()
     # Create the stations table which stores static information about subway stations
     cursor.execute('''
@@ -78,7 +78,7 @@ def setup_db():
 
 
 def generic_lookup(query:str, data:list):
-    cxn = create_cxn_on_db('static_data.db')
+    cxn = create_cxn_on_db('commute_check.db')
     cxn.row_factory = sqlite3.Row
     cursor = cxn.cursor()
     result = cursor.execute(query, data).fetchall()
@@ -104,7 +104,7 @@ def get_user_info(username):
 
 def add_user(request):
     '''Insert new user into the db with a hashed password'''
-    cxn = create_cxn_on_db('static_data.db')
+    cxn = create_cxn_on_db('commute_check.db')
     cursor = cxn.cursor()
     cursor.execute("INSERT INTO users (username, hash) values(?, ?)", [request.form.get(
         "username"), generate_password_hash(request.form.get("password"))])
@@ -124,7 +124,7 @@ def get_leg_data(commute_id):
 
 def add_commute_to_db(commute_data):
     '''Adds the data from the supplied payload to the db'''
-    cxn = create_cxn_on_db('static_data.db')
+    cxn = create_cxn_on_db('commute_check.db')
     cursor = cxn.cursor()
     ''' 
     Expecting to get a json body with the format:
@@ -152,7 +152,7 @@ def add_commute_to_db(commute_data):
 
 def delete_commute_from_db(commute_id):
     '''Deletes a commute record and associated commute legs from the db'''
-    cxn = create_cxn_on_db('static_data.db')
+    cxn = create_cxn_on_db('commute_check.db')
     cursor = cxn.cursor()
     cursor.execute("DELETE FROM commute_legs WHERE commute_id = ?", [commute_id])
     cursor.execute("DELETE FROM commutes WHERE id = ?", [commute_id])

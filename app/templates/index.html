@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<script src="/static/index.js"></script>
+{% endblock %}
+
 {% block title %}
     Is My Commute Fucked?
 {% endblock %}
@@ -22,14 +26,14 @@
                     <tr>
                         <td>{{ commute.name }}</td>
                         <td>
-                            <form action="/checkcommute" method="post" class="form">
+                            <form action="javascript:check_commute({{ commute.id }})" class="form">
                                 <div class="form_group">
                                     <input type="hidden" name="commute_id" id="commute_id" value={{ commute.id }}>
                                     <button class="btn btn-primary mb-2" type="submit">Check</button>
                                 </div>
                             </form>
                         </td>
-                        <td id={{ commute.id }}>Yes</td>
+                        <td id={{ commute.id }}></td>
                         <td>
                             <form action="/updatecommute" method="post" class="form">
                                 <div class="form_group">

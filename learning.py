@@ -1,13 +1,15 @@
 from google.transit import gtfs_realtime_pb2
 from urllib.request import Request, urlopen
 import os
+import time
 
-feed = gtfs_realtime_pb2.FeedMessage()
-req = Request('https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace')
-req.add_header('x-api-key', os.environ['MTA_API_KEY'])
-response = urlopen(req)
-feed.ParseFromString(response.read())
-print(feed.entity[0])
+# trips_feed = gtfs_realtime_pb2.FeedMessage()
+# req = Request('https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace')
+# req.add_header('x-api-key', os.environ['MTA_API_KEY'])
+# response = urlopen(req)
+# trips_feed.ParseFromString(response.read())
+# print(trips_feed.entity[0])
+
 
 
 '''
@@ -41,3 +43,14 @@ trip_update {
 
 I need to find a resource with information for each stop.
 '''
+print('\n\n')
+
+feed = gtfs_realtime_pb2.FeedMessage()
+req = Request('https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/camsys%2Fsubway-alerts')
+req.add_header('x-api-key', os.environ['MTA_API_KEY'])
+response = urlopen(req)
+feed.ParseFromString(response.read())
+current_time = int(time.time())
+# print(feed.entity[0])
+for entity in feed.entity:
+  print(entity.alert.header_text.translation[0].text)
