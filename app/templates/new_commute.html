@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block head %}
-<script src="/static/new_commute.js"></script>
+<script src="/static/add_edit_commute.js"></script>
 {% endblock %}
 
 {% block title %}
@@ -19,10 +19,10 @@
             {% endfor %}
         </select>
         Origin <select name="origin_name1" id="origin_name1">
-            <option value="" selected="selected">Select the origin station</option>
+            <option value="" disabled selected="selected">Select the origin station</option>
         </select>
         Destination <select name="termination_name1" id="termination_name1">
-            <option value="" selected="selected">Select the destination station</option>
+            <option value="" disabled selected="selected">Select the destination station</option>
         </select>
         <div></div>
     </div>

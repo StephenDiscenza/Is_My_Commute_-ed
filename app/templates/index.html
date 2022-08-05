@@ -35,9 +35,10 @@
                         </td>
                         <td id={{ commute.id }}></td>
                         <td>
-                            <form action="/updatecommute" method="post" class="form">
+                            <form action="/begineditcommute" method="post" class="form">
                                 <div class="form_group">
                                     <input type="hidden" name="commute_id" id="commute_id" value={{ commute.id }}>
+                                    <input type="hidden" name="commute_name" id="commute_name" value={{ commute.name }}>
                                     <button class="btn btn-primary mb-2" type="submit">Edit</button>
                                 </div>
                             </form>

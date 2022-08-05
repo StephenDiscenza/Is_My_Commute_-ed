@@ -22,9 +22,9 @@ function update_drop_downs(line, leg_num) {
                 response.json().then(function(data) {
                     console.log(data);
                     for(var i = 0; i < data.length; i++){
-                        let origin_element_id = "origin_name" + leg_index.toString();
+                        let origin_element_id = "origin_name" + leg_num.toString();
                         document.getElementById(origin_element_id).options[i] = new Option(data[i].name, data[i].id + "|" + data[i].name);
-                        let termination_element_id = "termination_name" + leg_index.toString();
+                        let termination_element_id = "termination_name" + leg_num.toString();
                         document.getElementById(termination_element_id).options[i] = new Option(data[i].name, data[i].id + "|" + data[i].name);
                     };
                 });
@@ -57,10 +57,17 @@ function add_commute_leg() {
     var termination = document.createElement("select");
     termination.setAttribute("name", "termination_name" + leg_index.toString());
     termination.setAttribute("id", "termination_name" + leg_index.toString());
+    var new_line = document.createElement("div");
 
     commute_form.append(line);
     commute_form.append(origin);
     commute_form.append(termination);
+    commute_form.append(new_line);
     return true;
 
 }
+
+function update_leg_index(idx) {
+    leg_index = idx;
+}
+

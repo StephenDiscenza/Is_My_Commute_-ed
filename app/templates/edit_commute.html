@@ -1,9 +1,43 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<script src="/static/add_edit_commute.js"></script>
+{% endblock %}
+
 {% block title %}
-    How's My Commute
+    Edit this commute
 {% endblock %}
 
 {% block main %}
-<h1>Interface for editing a commute</h1>
+<form action="/editcommute" method="post" class="form">
+    <div class="form_group" id="leg_data">
+        <input autocomplete="off" autofocus name="name" value={{ commute_data.name }} type="text">
+        <input autocomplete="off" autofocus name="commute_id" value={{ commute_data.id }} type="text" hidden>
+        {% for leg in commute_data.legs %}
+            Line <select name={{ leg.line_name_id }} id={{ leg.line_name_id }} onChange="update_drop_downs(this.options[this.selectedIndex].value, {{ leg.idx }})">
+                {% for line in lines %}
+                    <option value={{ line }}{% if line==leg.line %} selected="selected" {% endif %}>{{ line }}</option>
+                {% endfor %}
+            </select>
+            Origin <select name={{ leg.origin_name_id }} id={{ leg.origin_name_id }}>
+                {% for station in leg.stations %}
+                    <option value="{{ station.value }}"{% if station.value==leg.origin_value %} selected="selectetd" {% endif %}>{{ station.name }}</option>
+                {% endfor %}
+            </select>
+            Destination <select name={{ leg.termination_name_id }} id={{ leg.termination_name_id }}>
+                {% for station in leg.stations %}
+                    <option value="{{ station.value }}"{% if station.value==leg.termination_value %} selected="selectetd" {% endif %}>{{ station.name }}</option>
+                {% endfor %}
+            </select>
+            <div></div>
+        {% endfor %}
+    </div>
+    <button type="button" onclick="add_commute_leg()">Add a Commute Leg</button>
+    <input type="submit" value="Save Commute">
+</form>
+<script type="text/javascript">
+    var commute_data = JSON.parse('{{ commute_data | tojson | safe }}');
+    var max_leg_index = commute_data.legs.length;
+    update_leg_index(max_leg_index);
+</script> 
 {% endblock %}

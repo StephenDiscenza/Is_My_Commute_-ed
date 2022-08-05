@@ -1,6 +1,9 @@
 from flask import session, redirect, render_template
 from functools import wraps
+import json
+from app import app
 
+from .database_helpers import add_commute_to_db
 
 
 def login_required(f):
@@ -70,3 +73,29 @@ def apology(message, code=400):
             s = s.replace(old, new)
         return s
     return render_template("apology.html", top=code, bottom=escape(message)), code
+
+
+def add_commute_helper(request):
+    request_json = {'user_id': session['user_id'], 'name': request.form.get('name'), 'legs': []}
+    leg_index = 1
+    while True:
+        leg = {}
+        leg['line'] = request.form.get(f'line{leg_index}')
+        try: 
+            origin_info = request.form.get(f'origin_name{leg_index}').split('|') # data is a string with the format "origin_id|origin_name"
+        except AttributeError:
+            break
+        leg['originId'] = origin_info[0]
+        leg['originName'] = origin_info[1]
+        termination_info = request.form.get(f'termination_name{leg_index}').split('|')
+        leg['terminationId'] = termination_info[0]
+        leg['terminationName'] = termination_info[1]
+        request_json['legs'].append(leg)
+        leg_index += 1 
+    try:
+        add_commute_to_db(request_json)
+    except Exception as e:
+        app.logger.error(e)
+        response = json.dumps({'error': f'Adding commute record failed'})
+        return False, response
+    return True, None

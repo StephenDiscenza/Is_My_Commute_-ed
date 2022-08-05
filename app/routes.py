@@ -4,10 +4,12 @@ from flask_session import Session
 import json
 
 from app import app
-from app.route_helpers import login_required, apology, validate_user_data
+from app.route_helpers import login_required, apology, validate_user_data, add_commute_helper
 from app.database_helpers import get_user_info, add_user, get_commutes, get_leg_data, get_stations_by_line, add_commute_to_db, delete_commute_from_db
 from app.mta_data_helpers import get_commute_alets, analyze_commute_alerts
 
+
+LINES = ['1', '2', '3', '4', '5', '6', '7', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'J', 'L', 'M', 'N', 'Q', 'R', 'S', 'W', 'Z']
 
 @app.route('/')
 @login_required
@@ -91,47 +93,59 @@ def check_commute():
     response = json.dumps({'result': commute_is_bad, 'alerts': commute_alerts_text})
     return Response(response, 200, mimetype='application/json')
 
-    
-    # # Get origin and destination data for each leg of the commute from the db
-    # commute_legs = get_leg_data(request['commute_id'])
-    # for leg in commute_legs:
-    #     # Get live data for line this leg uses
-    #     # Add at least one commute to the db before trying this part
-    #     pass
-
 
 @app.route('/addcommute', methods=['GET', 'POST'])
 @login_required
 def add_commute():
     if request.method == 'GET':
-        lines = ['1', '2', '3', '4', '5', '6', '7', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'J', 'L', 'M', 'N', 'Q', 'R', 'S', 'W', 'Z']
-        return render_template('new_commute.html', lines=lines)
+        return render_template('new_commute.html', lines=LINES)
     
-    # For a post request we need to create the JSON expected by the add_commute function from the data in the form
-    request_json = {'user_id': session['user_id'], 'name': request.form.get('name'), 'legs': []}
-    leg_index = 1
-    while True:
-        leg = {}
-        leg['line'] = request.form.get(f'line{leg_index}')
-        try: 
-            origin_info = request.form.get(f'origin_name{leg_index}').split('|') # data is a string with the format "origin_id|origin_name"
-        except AttributeError:
-            break
-        leg['originId'] = origin_info[0]
-        leg['originName'] = origin_info[1]
-        termination_info = request.form.get(f'termination_name{leg_index}').split('|')
-        leg['terminationId'] = termination_info[0]
-        leg['terminationName'] = termination_info[1]
-        request_json['legs'].append(leg)
-        leg_index += 1 
-    try:
-        add_commute_to_db(request_json)
-    except Exception as e:
-        app.logger.error(e)
-        response = json.dumps({'error': f'Adding commute record failed'})
+    success, response = add_commute_helper(request)
+    # if everything went well we get back True for sucess and None for the response
+    if success:
+        return redirect('/')
+    else:
         return Response(response, 400, mimetype='application/json')
-    
-    return redirect('/')
+
+
+@app.route('/begineditcommute', methods=['POST'])
+@login_required
+def begin_edit_commute():
+    # Here the user is saying I want to update the commute with the supplied id. We return the html giving the user that ability
+    commute_id = request.form.get('commute_id')
+    commute_name = request.form.get('commute_name')
+    # Get all the leg data for the commute and construct JSON used by the template
+    legs = [dict(leg) for leg in get_leg_data(commute_id)]
+    for idx, leg in enumerate(legs):
+        stations_sql_data = get_stations_by_line(leg['line'])
+        stations = [{'name': station['stop_name'], 'value': station['gtfs_stop_id'] + '|' + station['stop_name']} for station in stations_sql_data]
+        leg['stations'] = stations
+        leg['line_name_id'] = f'line{idx + 1}'
+        leg['origin_name_id'] = f'origin_name{idx + 1}'
+        leg['termination_name_id'] = f'termination_name{idx + 1}'
+        leg['origin_value'] = leg['origin_id'] + '|' + leg['origin_name']
+        leg['termination_value'] = leg['termination_id'] + '|' + leg['termination_name']
+        leg['idx'] = str(idx + 1)
+    commute_data = {
+        'id': commute_id,
+        'name': commute_name,
+        'legs': legs
+    }
+    return render_template('edit_commute.html', commute_data=commute_data, lines=LINES)
+
+
+@app.route('/editcommute', methods=['POST', 'GET'])
+@login_required
+def edit_commute():    
+    # This is our update. Instead of trying to find an update all these ids, it's simpler to just delete the old commute and add this as a new one
+    commute_id = request.form.get('commute_id')
+    delete_commute_from_db(commute_id)
+    success, response = add_commute_helper(request)
+    # if everything went well we get back True for sucess and None for the response
+    if success:
+        return redirect('/')
+    else:
+        return Response(response, 400, mimetype='application/json')
 
 
 @app.route('/deletecommute', methods=['POST'])
