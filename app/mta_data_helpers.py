@@ -25,7 +25,7 @@ def get_commute_alets(commute_id) -> bool:
                 if current_time >= active_period.start:
                     try:
                         # Check that there is an end time and that it's after the current time
-                        if current_time <= active_period.end:
+                        if current_time <= active_period.end or active_period.end == 0:
                             return True
                     except AttributeError:
                         # Assume alert is ongoing if there isn't an end time
