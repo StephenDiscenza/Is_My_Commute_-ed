@@ -1,5 +1,5 @@
 # Is My Commute !@#$ed?
-## Video Demo:  <URL HERE>
+
 ## Description:
 Living in NYC inevitably means experiencing the joys of our miserably maintained subway system. Very often a 30 minute commute turns into a 60 minute odyssey highlighting the decline of American society. There are a nearly infinite number of things that can go wrong and it's very hard to tell how bad a particular trip is going to be, but it would be nice to know ahead of time that it's probably not going to be good. There currently exists a site called (with censoring) istheltrain!@#$ed.com which does exactly this. I've decided to do the same for any commute, including those spanning multiple subway lines.  
   
