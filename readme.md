@@ -6,9 +6,9 @@ Living in NYC inevitably means experiencing the joys of our miserably maintained
 Users can input any number of commutes each with any number of legs, meaning segments of different lines. These commutes are checked for current alerts and scored according to the severity of those alerts. A result is returned to the user as well as the text for the alerts found.
 
 ### Files:
-The project is a Python Flask web app organized very similarly to week 9's finance homework. The templates folder contains all HTML files, the static folder has mostly boilerplate stuff plus a couple javascript files and one css file, and the app directory contains these folders plus all the Python files.  
+The project is a Python Flask web app. The templates folder contains all HTML files, the static folder has mostly boilerplate stuff plus a couple javascript files and one css file, and the app directory contains these folders plus all the Python files.  
   
-The Python files are slightly different than the week 9 example. Instead of having everything in one app.py file there is an \_\_init\_\_.py which is responsible for getting the app running and then a routes.py file which contains all the endpoint logic. Additionally, there are three helper files which contain some functions used as part of various endpoints' logic. This was done just to keep the routes file from getting cluttered. 
+There is an \_\_init\_\_.py which is responsible for getting the app running and then a routes.py file which contains all the endpoint logic. Additionally, there are three helper files which contain some functions used as part of various endpoints' logic. This was done to keep the routes file from getting cluttered. 
   
 Outside of the app directory is a requirements.txt file which lists all the packages/libraries used in the project. 
 
