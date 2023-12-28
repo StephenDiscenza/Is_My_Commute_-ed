@@ -1,6 +1,5 @@
 from flask import redirect, render_template, request, session, Response
 from werkzeug.security import check_password_hash
-from flask_session import Session
 import json
 
 from app import app

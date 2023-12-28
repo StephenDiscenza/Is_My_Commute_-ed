@@ -1,8 +1,9 @@
 from google.transit import gtfs_realtime_pb2
 from urllib.request import Request, urlopen
 from .database_helpers import get_leg_data
-import os
 import time
+
+from config import Config
 
 def get_commute_alets(commute_id) -> bool:
     '''Check for all alerts related to the lines the provided commute uses'''
@@ -12,7 +13,7 @@ def get_commute_alets(commute_id) -> bool:
 
     feed = gtfs_realtime_pb2.FeedMessage()
     req = Request('https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/camsys%2Fsubway-alerts')
-    req.add_header('x-api-key', os.environ['MTA_API_KEY'])
+    req.add_header('x-api-key', Config.MTA_API_KEY)
     response = urlopen(req)
     feed.ParseFromString(response.read())
     current_time = int(time.time())
